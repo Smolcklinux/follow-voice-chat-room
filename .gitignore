@@ -1,0 +1,17 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+android/local.properties
+android/app/build/
+android/build/
+ios/build/
+.env
+*.keystore
+*.jks
+.DS_Store
+*.log
+*.lock
+*.pid
+*.seed
+.haste-map-*
+.metro-*
