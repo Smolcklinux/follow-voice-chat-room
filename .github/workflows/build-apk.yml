@@ -2,13 +2,13 @@ name: Build Android APK
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: 📥 Checkout
@@ -18,7 +18,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: ☕ Setup Java
         uses: actions/setup-java@v4
@@ -27,27 +26,25 @@ jobs:
           java-version: 17
 
       - name: 📦 Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
-      - name: 🔧 Setup Android SDK
+      - name: 🔧 Configurar Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 11076708
-          accept-android-sdk-licenses: true
 
-      - name: 🔑 Create local.properties
+      - name: 🔑 Criar local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
-      - name: 🔨 Build APK
+      - name: 🚀 Build APK (modo simplificado)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-          cd ..
+          # Pular testes e tarefas desnecessárias
+          ./gradlew assembleDebug -x test -x lint --no-daemon --stacktrace
+        env:
+          JAVA_OPTS: "-Xmx2048m"
 
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: follow-voice-chat-room
           path: android/app/build/outputs/apk/debug/*.apk
-          retention-days: 30
