@@ -34,7 +34,8 @@ jobs:
             ~/.gradle/wrapper
             android/.gradle
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: 📦 Install dependencies
         run: npm ci --legacy-peer-deps
@@ -50,13 +51,14 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > android/local.properties
           cat android/local.properties
 
+      - name: 🔨 Fix Gradle permissions
+        run: chmod +x android/gradlew
+
       - name: 🚀 Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace --info
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        working-directory: android
         env:
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false"
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Xmx2048m"
 
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
